@@ -104,25 +104,3 @@ export const getDtmfFrequencies = (digit) => {
 
   return [dtmfMatrix.cols[col], dtmfMatrix.rows[row]];
 };
-
-/*export const playRingTone = (rings, nodes, cadence, index = 0) => {
-  if (rings < 0) {
-    return;
-  }
-
-  const state = index % 2 === 0;
-
-  nodes.forEach((node) =>
-    (state ? node.start.bind(node) : node.stop.bind(node))()
-  );
-
-  if (index < cadence.length) {
-    setTimeout(
-      () => playRingTone(rings, nodes, cadence, index + 1),
-      cadence[index]
-    );
-  } else {
-    nodes.forEach((node) => node.stop());
-    playRingTone(rings - 1, nodes, cadence);
-  }
-};*/

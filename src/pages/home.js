@@ -1,13 +1,16 @@
 import { Helmet } from 'react-helmet';
-import { Container, Form, InputGroup } from 'react-bootstrap';
-import { Fragment, useEffect, useState } from 'react';
+import { useFormik } from 'formik';
+import { Button, Container, Form } from 'react-bootstrap';
+import { Fragment, useEffect, useState, useCallback } from 'react';
 
 import CustomErrorBoundary from 'components/ErrorBoundary';
 import { dialTones, localities, ringTones } from 'utils';
-import { useFormik } from 'formik';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlay, faStop } from '@fortawesome/free-solid-svg-icons';
-import { createDialChannel, createRingChannel } from 'utils/audio';
+import {
+  createDialChannel,
+  createDialToneChannel,
+  createRingToneChannel
+} from 'utils/audio';
+import { Transport } from 'tone';
 
 export const ErrorBoundary = CustomErrorBoundary;
 
@@ -23,31 +26,52 @@ export function Component() {
       volume: -Infinity
     }
   });
-  const [channels, setChannels] = useState({});
+  const [sounds, setSounds] = useState({});
   const { values, handleChange, handleSubmit, setFieldValue } = useFormik({
     initialValues: {
       hookState: false,
+      dialing: false,
       ringing: false,
       locality: 'na'
     }
   });
+  const startCall = useCallback(() => {
+    sounds.dialTone.stop();
+    sounds.dialing.start('8608698669');
+    setFieldValue('dialing', true);
+    setTimeout(() => {
+      setFieldValue('dialing', false);
+      setFieldValue('ringing', true);
+      sounds.dialing.stop();
+      sounds.ringTone.start(2);
+    }, 5250);
+  }, [sounds, setFieldValue]);
 
-  useEffect(() => {
-    if (values.hookState) {
-      setChannels({
-        dialTone: createDialChannel(toneData.dialTone),
-        ringTone: createRingChannel(toneData.ringTone)
-      });
-    } else {
-      setChannels((prevVal) => {
-        Object.entries(prevVal).forEach(([, channel]) => {
+  useEffect(
+    () =>
+      setSounds((prevVal) => {
+        Object.entries(prevVal).forEach(([, { channel, nodes }]) => {
+          nodes.forEach((node) => node.dispose());
           channel.mute = true;
         });
 
-        return {};
-      });
-    }
-  }, [values.hookState, toneData]);
+        if (values.hookState) {
+          Transport.start();
+          const dialToneChannel = createDialToneChannel(toneData.dialTone);
+
+          dialToneChannel.start();
+
+          return {
+            dialTone: dialToneChannel,
+            ringTone: createRingToneChannel(toneData.ringTone),
+            dialing: createDialChannel({ pressDurationMs: 500, volume: -8 })
+          };
+        } else {
+          return {};
+        }
+      }),
+    [values.hookState, toneData]
+  );
 
   useEffect(
     () =>
@@ -84,22 +108,15 @@ export function Component() {
           {values.hookState && (
             <Form.Group>
               <Form.Label>Start Call</Form.Label>
-              <InputGroup>
-                <Form.Switch
-                  disabled={values.ringing}
-                  onClick={() => {
-                    channels.dialTone.mute = true;
-                    channels.ringTone.start(5);
-                    setFieldValue('ringing', true);
-                  }}
-                />
-                <InputGroup.Text>
-                  <FontAwesomeIcon
-                    icon={values.ringing ? faStop : faPlay}
-                    fixedWidth
-                  />
-                </InputGroup.Text>
-              </InputGroup>
+              <Button
+                disabled={values.ringing || values.dialing}
+                variant={
+                  values.ringing || values.dialing ? 'success' : 'danger'
+                }
+                onClick={startCall}
+              >
+                Start Call
+              </Button>
             </Form.Group>
           )}
         </Form>
