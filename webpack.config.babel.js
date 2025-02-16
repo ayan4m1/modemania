@@ -11,9 +11,7 @@ import CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
 const dev = process.env.NODE_ENV === 'development';
 
 const plugins = [
-  new CnameWebpackPlugin({
-    domain: 'modemania.andrewdelisa.com'
-  }),
+  new CnameWebpackPlugin({ domain: 'modemania.andrewdelisa.com' }),
   new CleanPlugin(),
   new StylelintPlugin({
     configFile: '.stylelintrc',
@@ -23,10 +21,8 @@ const plugins = [
     quiet: false,
     customSyntax: 'postcss-scss'
   }),
-  new HtmlPlugin({
-    template: './src/index.html'
-  }),
-  new ESLintPlugin(),
+  new HtmlPlugin({ template: './src/index.html' }),
+  new ESLintPlugin({ configType: 'flat' }),
   new MiniCssExtractPlugin()
 ];
 
@@ -43,11 +39,7 @@ export default {
   },
   module: {
     rules: [
-      {
-        test: /\.js$/,
-        exclude: /node_modules/,
-        use: ['babel-loader']
-      },
+      { test: /\.js$/, exclude: /node_modules/, use: ['babel-loader'] },
       {
         test: /\.(sa|sc|c)ss$/,
         use: [
@@ -66,17 +58,19 @@ export default {
               sourceMap: dev
             }
           },
-          'sass-loader'
+          {
+            loader: 'sass-loader',
+            options: {
+              sassOptions: {
+                quietDeps: true
+              }
+            }
+          }
         ]
       },
       {
         test: /\.html$/,
-        use: [
-          {
-            loader: 'html-loader',
-            options: { minimize: true }
-          }
-        ]
+        use: [{ loader: 'html-loader', options: { minimize: true } }]
       }
     ]
   },
@@ -96,11 +90,7 @@ export default {
   },
   optimization: {
     minimizer: [
-      new TerserPlugin({
-        terserOptions: {
-          ecma: 12
-        }
-      }),
+      new TerserPlugin({ terserOptions: { ecma: 12 } }),
       new CssMinimizerPlugin()
     ]
   }

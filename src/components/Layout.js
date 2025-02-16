@@ -10,7 +10,7 @@ export default function Layout({ children }) {
   return (
     <Fragment>
       <Helmet titleTemplate="Modemania - %s" />
-      <Navbar variant="dark" expand="lg">
+      <Navbar expand="lg" variant="dark">
         <Container>
           <Navbar.Brand>
             <Nav.Link as={Link} to="/">

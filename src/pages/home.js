@@ -16,15 +16,8 @@ export const ErrorBoundary = CustomErrorBoundary;
 
 export function Component() {
   const [toneData, setToneData] = useState({
-    dialTone: {
-      frequencies: [],
-      volume: -Infinity
-    },
-    ringTone: {
-      cadence: [],
-      frequencies: [],
-      volume: -Infinity
-    }
+    dialTone: { frequencies: [], volume: -Infinity },
+    ringTone: { cadence: [], frequencies: [], volume: -Infinity }
   });
   const [sounds, setSounds] = useState({});
   const { values, handleChange, handleSubmit, setFieldValue } = useFormik({
@@ -110,10 +103,10 @@ export function Component() {
               <Form.Label>Start Call</Form.Label>
               <Button
                 disabled={values.ringing || values.dialing}
+                onClick={startCall}
                 variant={
                   values.ringing || values.dialing ? 'success' : 'danger'
                 }
-                onClick={startCall}
               >
                 Start Call
               </Button>

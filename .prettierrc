@@ -2,12 +2,5 @@
   "singleQuote": true,
   "trailingComma": "none",
   "endOfLine": "auto",
-  "overrides": [
-    {
-      "files": "*.scss",
-      "options": {
-        "singleQuote": false
-      }
-    }
-  ]
+  "overrides": [{ "files": "*.scss", "options": { "singleQuote": false } }]
 }
